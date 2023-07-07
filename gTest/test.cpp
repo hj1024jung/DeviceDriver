@@ -129,11 +129,11 @@ TEST(TestCaseName, flashWriteFail) {
 	EXPECT_THROW(driver.write(addr, data), WriteFailException);
 }
 
-TEST(TestCaseName, flashReadAndPrint) {
+TEST(TestCaseName, appReadAndPrint) {
 	FlashMock flashMock;
 
-	int addrStart = 10;
-	int addrEnd = 20;
+	int addrStart = 0;
+	int addrEnd = 4;
 	int data = 'A';
 
 	for(int addr = addrStart; addr <= addrEnd; addr++)
@@ -145,4 +145,41 @@ TEST(TestCaseName, flashReadAndPrint) {
 	Application app(&driver);
 
 	app.ReadAndPrint(addrStart, addrEnd);
+}
+
+TEST(TestCaseName, appWriteAll) {
+	FlashMock flashMock;
+
+	int addrStart = 0;
+	int addrEnd = 5;
+	int notCleandata = 'Z';
+	int data = 'A';
+
+	for (int addr = addrStart; addr < addrEnd; addr++)
+	{
+		EXPECT_CALL(flashMock, read(addr)).Times(1).WillRepeatedly(Return(notCleandata));
+		EXPECT_CALL(flashMock, write(addr, data)).Times(1);
+	}
+
+	DeviceDriver driver(&flashMock);
+	Application app(&driver);
+
+	app.WriteAll(data);
+}
+
+TEST(TestCaseName, appWriteAllFail) {
+	NiceMock<FlashMock> flashMock;
+
+	int addrStart = 0;
+	int addrEnd = 5;
+	int notCleandata = 'Z';
+	int data = 'A';
+
+	EXPECT_CALL(flashMock, read(addrStart)).Times(1).WillRepeatedly(Return(DeviceDriver::CleanPattern));
+	EXPECT_CALL(flashMock, write(addrStart, data)).Times(0);
+
+	DeviceDriver driver(&flashMock);
+	Application app(&driver);
+
+	EXPECT_THROW(app.WriteAll(data), WriteFailException);
 }

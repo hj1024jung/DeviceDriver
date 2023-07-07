@@ -16,4 +16,8 @@ void Application::ReadAndPrint(int startAddr, int endAddr)
 
 void Application::WriteAll(int value)
 {
+	for (long addr = 0; addr < 5; addr++)
+	{
+		m_pstDriver->write(addr, value);
+	}
 }
