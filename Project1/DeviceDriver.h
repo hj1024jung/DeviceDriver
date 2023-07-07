@@ -5,6 +5,7 @@ class DeviceDriver
 {
 public:
     static const int ReadTryCount = 5;
+    static const int CleanPattern = 0xFF;
 
     DeviceDriver(FlashMemoryDevice* hardware);
     int read(long address);

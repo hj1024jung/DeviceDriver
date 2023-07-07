@@ -12,6 +12,13 @@ public:
     {}
 };
 
+class WriteFailException : public exception
+{
+public:
+    explicit WriteFailException()
+        : exception("__WRITE_EXCEPTION_OCCURED__")
+    {}
+};
 
 DeviceDriver::DeviceDriver(FlashMemoryDevice* hardware) : m_hardware(hardware)
 {}
@@ -22,7 +29,7 @@ int DeviceDriver::read(long address)
 
     for (int loop = 0; loop < (ReadTryCount - 1); loop++)
     {
-        Sleep(ReadIssueIntervalMilliSec);
+        //Sleep(ReadIssueIntervalMilliSec);
 
         int readVal = m_hardware->read(address);
 
@@ -37,6 +44,10 @@ int DeviceDriver::read(long address)
 
 void DeviceDriver::write(long address, int data)
 {
-    // TODO: implement this method
+    if (CleanPattern == m_hardware->read(address))
+    {
+        throw WriteFailException();
+    }
+    
     m_hardware->write(address, (unsigned char)data);
 }

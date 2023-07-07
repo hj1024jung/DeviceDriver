@@ -99,3 +99,31 @@ TEST(TestCaseName, flashReadFailAt5thTry) {
 
 	EXPECT_THROW(driver.read(addr), ReadFailException);
 }
+
+TEST(TestCaseName, flashWriteSuccess) {
+	FlashMock flashMock;
+
+	long addr = 10;
+	int data = 'A';
+
+	EXPECT_CALL(flashMock, read(addr)).Times(1).WillOnce(Return('A')).WillOnce(Return('A')).WillOnce(Return('A')).WillOnce(Return('A')).WillOnce(Return(DeviceDriver::CleanPattern));
+	EXPECT_CALL(flashMock, write(addr, data)).Times(1);
+
+	DeviceDriver driver(&flashMock);
+
+	driver.write(addr, data);
+}
+
+TEST(TestCaseName, flashWriteFail) {
+	FlashMock flashMock;
+
+	long addr = 10;
+	int data = 'A';
+
+	EXPECT_CALL(flashMock, read(addr)).Times(1).WillOnce(Return(DeviceDriver::CleanPattern));
+	EXPECT_CALL(flashMock, write(addr, data)).Times(0);
+
+	DeviceDriver driver(&flashMock);
+
+	EXPECT_THROW(driver.write(addr, data), WriteFailException);
+}
