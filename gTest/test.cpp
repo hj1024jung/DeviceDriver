@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "../Project1/DeviceDriver.cpp"
+#include "../Project1/Application.cpp"
 
 using namespace testing;
 
@@ -126,4 +127,22 @@ TEST(TestCaseName, flashWriteFail) {
 	DeviceDriver driver(&flashMock);
 
 	EXPECT_THROW(driver.write(addr, data), WriteFailException);
+}
+
+TEST(TestCaseName, flashReadAndPrint) {
+	FlashMock flashMock;
+
+	int addrStart = 10;
+	int addrEnd = 20;
+	int data = 'A';
+
+	for(int addr = addrStart; addr <= addrEnd; addr++)
+	{
+		EXPECT_CALL(flashMock, read(addr)).Times(DeviceDriver::ReadTryCount).WillRepeatedly(Return(data));		
+	}
+
+	DeviceDriver driver(&flashMock);
+	Application app(&driver);
+
+	app.ReadAndPrint(addrStart, addrEnd);
 }
